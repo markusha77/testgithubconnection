@@ -17,37 +17,36 @@ function Login({ onLogin }: LoginProps) {
     setError('')
 
     if (!email || !password) {
-      setError('ALL FIELDS REQUIRED')
+      setError('All fields are required')
       return
     }
 
     if (isSignUp && password !== confirmPassword) {
-      setError('PASSWORDS DO NOT MATCH')
+      setError('Passwords do not match')
       return
     }
 
     if (password.length < 6) {
-      setError('PASSWORD TOO WEAK (MIN 6 CHARS)')
+      setError('Password must be at least 6 characters')
       return
     }
 
-    // Simple localStorage-based auth
-    const users = JSON.parse(localStorage.getItem('brutalTodoUsers') || '{}')
+    const users = JSON.parse(localStorage.getItem('neumorphicTodoUsers') || '{}')
 
     if (isSignUp) {
       if (users[email]) {
-        setError('USER ALREADY EXISTS')
+        setError('User already exists')
         return
       }
       users[email] = {
         password,
         id: Date.now().toString(),
       }
-      localStorage.setItem('brutalTodoUsers', JSON.stringify(users))
+      localStorage.setItem('neumorphicTodoUsers', JSON.stringify(users))
       onLogin({ email, id: users[email].id })
     } else {
       if (!users[email] || users[email].password !== password) {
-        setError('INVALID CREDENTIALS')
+        setError('Invalid credentials')
         return
       }
       onLogin({ email, id: users[email].id })
@@ -55,98 +54,95 @@ function Login({ onLogin }: LoginProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 font-mono">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8 border-4 border-black bg-[#FF005C] p-6 shadow-[8px_8px_0_black]">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 uppercase tracking-tight">
-            BRUTAL TODO
+        <div className="mb-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-8 shadow-neumorphic text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-3 tracking-tight">
+            My Tasks
           </h1>
-          <p className="text-white text-sm font-semibold uppercase">
-            {isSignUp ? 'CREATE YOUR ACCOUNT' : 'SIGN IN TO CONTINUE'}
+          <p className="text-gray-600 font-medium">
+            {isSignUp ? 'Create your account' : 'Welcome back'}
           </p>
         </div>
 
-        {/* Login Form */}
-        <div className="border-4 border-black bg-white p-6 shadow-[8px_8px_0_black]">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl p-8 shadow-neumorphic">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-bold uppercase mb-2">EMAIL</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="YOUR@EMAIL.COM"
-                className="w-full border-4 border-black p-3 text-lg font-semibold uppercase focus:outline-none focus:shadow-[4px_4px_0_black] transition-shadow"
+                placeholder="your@email.com"
+                className="w-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl px-6 py-4 shadow-neumorphic-inset focus:outline-none text-gray-700 placeholder-gray-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold uppercase mb-2">PASSWORD</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full border-4 border-black p-3 text-lg font-semibold focus:outline-none focus:shadow-[4px_4px_0_black] transition-shadow"
+                className="w-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl px-6 py-4 shadow-neumorphic-inset focus:outline-none text-gray-700"
               />
             </div>
 
             {isSignUp && (
               <div>
-                <label className="block text-sm font-bold uppercase mb-2">CONFIRM PASSWORD</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full border-4 border-black p-3 text-lg font-semibold focus:outline-none focus:shadow-[4px_4px_0_black] transition-shadow"
+                  className="w-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl px-6 py-4 shadow-neumorphic-inset focus:outline-none text-gray-700"
                 />
               </div>
             )}
 
             {error && (
-              <div className="border-4 border-black bg-[#FF005C] p-3">
-                <p className="text-white font-bold uppercase text-sm">{error}</p>
+              <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-4 shadow-neumorphic-inset">
+                <p className="text-red-600 font-medium text-sm">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full border-4 border-black bg-[#00F0FF] px-6 py-4 font-bold uppercase hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[4px_4px_0_black] transition-all flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-br from-blue-400 to-blue-500 text-white px-6 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 font-semibold text-lg"
             >
               {isSignUp ? (
                 <>
-                  <UserPlus size={24} strokeWidth={3} />
-                  SIGN UP
+                  <UserPlus size={22} />
+                  Sign Up
                 </>
               ) : (
                 <>
-                  <LogIn size={24} strokeWidth={3} />
-                  SIGN IN
+                  <LogIn size={22} />
+                  Sign In
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t-4 border-black">
+          <div className="mt-6 pt-6 border-t border-gray-300">
             <button
               onClick={() => {
                 setIsSignUp(!isSignUp)
                 setError('')
                 setConfirmPassword('')
               }}
-              className="w-full border-4 border-black bg-white px-6 py-3 font-bold uppercase hover:translate-x-1 hover:translate-y-1 transition-all"
+              className="w-full bg-gradient-to-br from-gray-100 to-gray-200 px-6 py-3 rounded-2xl shadow-neumorphic hover:shadow-neumorphic-inset transition-all font-medium text-gray-700"
             >
-              {isSignUp ? 'ALREADY HAVE ACCOUNT? SIGN IN' : 'NO ACCOUNT? SIGN UP'}
+              {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
             </button>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-8 border-4 border-black bg-black p-4 shadow-[8px_8px_0_#FF005C]">
-          <p className="text-white text-center font-bold uppercase text-xs">
-            BUILT WITH CHATANDBUILD • NO CODE • PURE CHAOS
+        <div className="mt-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-5 shadow-neumorphic">
+          <p className="text-gray-300 text-center font-medium text-sm">
+            Built with ChatAndBuild • No Code • Pure Elegance
           </p>
         </div>
       </div>
