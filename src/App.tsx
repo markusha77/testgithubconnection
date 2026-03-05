@@ -1,48 +1,102 @@
-import React, { useState } from 'react'
-import { Plus, Trash2, Check, X } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Plus, Trash2, Check, LogOut, User } from 'lucide-react'
+import Login from './components/Login'
 
 interface Todo {
   id: number
   text: string
   completed: boolean
   category: 'work' | 'personal' | 'urgent'
+  userId: string
+}
+
+interface UserData {
+  email: string
+  id: string
 }
 
 function App() {
-  const [todos, setTodos] = useState<Todo[]>([
-    { id: 1, text: 'Design the impossible', completed: false, category: 'work' },
-    { id: 2, text: 'Break all the rules', completed: true, category: 'personal' },
-    { id: 3, text: 'Ship before perfect', completed: false, category: 'urgent' },
-    { id: 4, text: 'Embrace the chaos', completed: false, category: 'work' },
-    { id: 5, text: 'Question everything', completed: true, category: 'personal' },
-  ])
+  const [user, setUser] = useState<UserData | null>(null)
+  const [todos, setTodos] = useState<Todo[]>([])
   const [inputValue, setInputValue] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<'work' | 'personal' | 'urgent'>('work')
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
 
-  const addTodo = () => {
-    if (inputValue.trim()) {
+  // Check for existing session on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('brutalTodoUser')
+    if (savedUser) {
+      const userData = JSON.parse(savedUser)
+      setUser(userData)
+      loadUserTodos(userData.id)
+    }
+  }, [])
+
+  const loadUserTodos = (userId: string) => {
+    const savedTodos = localStorage.getItem(`brutalTodos_${userId}`)
+    if (savedTodos) {
+      setTodos(JSON.parse(savedTodos))
+    } else {
+      // Default todos for new users
       setTodos([
+        { id: 1, text: 'Design the impossible', completed: false, category: 'work', userId },
+        { id: 2, text: 'Break all the rules', completed: true, category: 'personal', userId },
+        { id: 3, text: 'Ship before perfect', completed: false, category: 'urgent', userId },
+      ])
+    }
+  }
+
+  const handleLogin = (userData: UserData) => {
+    setUser(userData)
+    localStorage.setItem('brutalTodoUser', JSON.stringify(userData))
+    loadUserTodos(userData.id)
+  }
+
+  const handleLogout = () => {
+    if (user) {
+      localStorage.setItem(`brutalTodos_${user.id}`, JSON.stringify(todos))
+    }
+    setUser(null)
+    setTodos([])
+    localStorage.removeItem('brutalTodoUser')
+  }
+
+  const saveTodos = (newTodos: Todo[]) => {
+    if (user) {
+      localStorage.setItem(`brutalTodos_${user.id}`, JSON.stringify(newTodos))
+    }
+  }
+
+  const addTodo = () => {
+    if (inputValue.trim() && user) {
+      const newTodos = [
         ...todos,
         {
           id: Date.now(),
           text: inputValue,
           completed: false,
           category: selectedCategory,
+          userId: user.id,
         },
-      ])
+      ]
+      setTodos(newTodos)
+      saveTodos(newTodos)
       setInputValue('')
     }
   }
 
   const toggleTodo = (id: number) => {
-    setTodos(todos.map(todo => 
+    const newTodos = todos.map(todo => 
       todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ))
+    )
+    setTodos(newTodos)
+    saveTodos(newTodos)
   }
 
   const deleteTodo = (id: number) => {
-    setTodos(todos.filter(todo => todo.id !== id))
+    const newTodos = todos.filter(todo => todo.id !== id)
+    setTodos(newTodos)
+    saveTodos(newTodos)
   }
 
   const getCategoryColor = (category: string) => {
@@ -66,17 +120,36 @@ function App() {
     completed: todos.filter(t => t.completed).length,
   }
 
+  if (!user) {
+    return <Login onLogin={handleLogin} />
+  }
+
   return (
     <div className="min-h-screen bg-white p-4 md:p-8 font-mono">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
+        {/* Header with User Info */}
         <div className="mb-8 border-4 border-black bg-[#FF005C] p-6 shadow-[8px_8px_0_black]">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 uppercase tracking-tight">
-            BRUTAL TODO
-          </h1>
-          <p className="text-white text-sm md:text-base font-semibold uppercase">
-            NO MERCY. NO EXCUSES. JUST DO IT.
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 uppercase tracking-tight">
+                BRUTAL TODO
+              </h1>
+              <p className="text-white text-sm md:text-base font-semibold uppercase">
+                NO MERCY. NO EXCUSES. JUST DO IT.
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="border-4 border-black bg-white px-4 py-2 font-bold uppercase hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[4px_4px_0_black] transition-all flex items-center gap-2"
+            >
+              <LogOut size={20} strokeWidth={3} />
+              OUT
+            </button>
+          </div>
+          <div className="border-4 border-black bg-white px-4 py-2 inline-flex items-center gap-2">
+            <User size={20} strokeWidth={3} />
+            <span className="font-bold uppercase text-sm">{user.email}</span>
+          </div>
         </div>
 
         {/* Stats Bar */}
